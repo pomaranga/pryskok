@@ -17,11 +17,11 @@ def setup():
     img = loadImage('narKOT.png')  
     noStroke() 
     generate_platforms()
-
+    print("Setup complete") 
 def draw():
     global character_x, character_y, velocity_y, left_pressed, right_pressed
 
-    background(0) 
+    background(200) 
 
     velocity_y += gravity
     character_y += velocity_y
@@ -33,6 +33,9 @@ def draw():
 
     on_platform = False
     for platform in platforms:
+        platform['x'] += platform['velocity_x']
+        if platform['x'] <= 0 or platform['x'] + platform['width'] >= width:
+            platform['velocity_x'] *= -1
         if (character_x + character_width > platform['x'] and
             character_x < platform['x'] + platform['width'] and
             character_y + character_height >= platform['y'] and
@@ -78,16 +81,21 @@ def generate_platforms():
     for i in range(8):
         x = random(0, width - 50)
         y = i * 60 + 80 
+        velocity_x = 2  # Ustawienie stałej prędkości horyzontalnej
+        if random(1) < 0.5:  # Losowanie kierunku początkowego
+            velocity_x *= -1 
         platform = {
             'x': x,
             'y': y,
             'width': 50,
             'height': 10,
+            'velocity_x': velocity_x,
             'color': color(random(50, 255), random(50, 255), random(50, 255))  
         }
         platforms.append(platform)
-
+    print("Platforms generated:", platforms)
 def display_platforms():
     for platform in platforms:
         fill(platform['color'])  
         rect(platform['x'], platform['y'], platform['width'], platform['height'])
+    print("Platforms displayed")
