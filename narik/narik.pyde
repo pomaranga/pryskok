@@ -33,9 +33,10 @@ def draw():
 
     on_platform = False
     for platform in platforms:
-        platform['x'] += platform['velocity_x']
-        if platform['x'] <= 0 or platform['x'] + platform['width'] >= width:
-            platform['velocity_x'] *= -1
+        if platform['is_moving']:
+            platform['x'] += platform['velocity_x']
+            if platform['x'] <= 0 or platform['x'] + platform['width'] >= width:
+                platform['velocity_x'] *= -1
         if (character_x + character_width > platform['x'] and
             character_x < platform['x'] + platform['width'] and
             character_y + character_height >= platform['y'] and
@@ -54,6 +55,15 @@ def draw():
         velocity_y += gravity
 
     character_x = constrain(character_x, 0, width - character_width)
+    if character_y < height / 2:
+        scroll_y = height / 2 - character_y
+        character_y = height / 2
+        for platform in platforms:
+            platform['y'] += scroll_y
+    generate_new_platforms()
+    if character_y > height:
+        noLoop() 
+        print("Game Over")
 
     image(img, character_x, character_y, character_width, character_height)  
 
@@ -81,19 +91,43 @@ def generate_platforms():
     for i in range(8):
         x = random(0, width - 50)
         y = i * 60 + 80 
-        velocity_x = 2  # Ustawienie stałej prędkości horyzontalnej
-        if random(1) < 0.5:  # Losowanie kierunku początkowego
+        velocity_x = 2  
+        if random(1) < 0.5:  
             velocity_x *= -1 
+        is_moving = random(1) < 0.5 
         platform = {
             'x': x,
             'y': y,
             'width': 50,
             'height': 10,
             'velocity_x': velocity_x,
+            'is_moving': is_moving,
             'color': color(random(50, 255), random(50, 255), random(50, 255))  
         }
         platforms.append(platform)
     print("Platforms generated:", platforms)
+def generate_new_platforms():
+    global platforms
+    while len(platforms) < 8:
+        x = random(0, width - 50)
+        y = -10 
+        velocity_x = 2
+        if random(1) < 0.5:
+            velocity_x *= -1 
+        is_moving = random(1) < 0.5
+        platform = {
+            'x': x,
+            'y': y,
+            'width': 50,
+            'height': 10,
+            'velocity_x': velocity_x,
+            'is_moving': is_moving,
+            'color': color(random(50, 255), random(50, 255), random(50, 255))  
+        }
+        platforms.append(platform)
+   
+    platforms[:] = [platform for platform in platforms if platform['y'] < height]
+    print("New platforms generated:", platforms)
 def display_platforms():
     for platform in platforms:
         fill(platform['color'])  
