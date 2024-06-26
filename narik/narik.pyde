@@ -7,9 +7,30 @@ gravity = 0.5
 jump_strength = -15  
 velocity_y = jump_strength
 platforms = [] 
+bullets = []
 
 left_pressed = False
 right_pressed = False
+class Bullet:
+    def __init__(self, x, y, speed, direction):
+        self.x = x
+        self.y = y
+        self.speed = speed
+        self.direction = direction  # 'up', 'left', 'right'
+        self.width = 5
+        self.height = 10
+
+    def update(self):
+        if self.direction == 'up':
+            self.y += self.speed
+        elif self.direction == 'left':
+            self.x += self.speed
+        elif self.direction == 'right':
+            self.x += self.speed
+
+    def display(self):
+        fill(0)
+        rect(self.x, self.y, self.width, self.height)
 
 def setup():
     global img
@@ -69,6 +90,9 @@ def draw():
 
     display_platforms() 
 
+    update_and_display_bullets()
+
+
 def keyPressed():
     global left_pressed, right_pressed
     if key == CODED:
@@ -76,6 +100,12 @@ def keyPressed():
             left_pressed = True
         elif keyCode == RIGHT:
             right_pressed = True
+    if key == ' ':
+        bullets.append(Bullet(character_x + character_width / 2, character_y, -10, 'up'))
+    elif key == 'a':
+        bullets.append(Bullet(character_x, character_y + character_height / 2, -10, 'left'))
+    elif key == 'd':
+        bullets.append(Bullet(character_x + character_width, character_y + character_height / 2, 10, 'right'))
 
 def keyReleased():
     global left_pressed, right_pressed
@@ -133,3 +163,10 @@ def display_platforms():
         fill(platform['color'])  
         rect(platform['x'], platform['y'], platform['width'], platform['height'])
     print("Platforms displayed")
+
+def update_and_display_bullets():
+    for bullet in bullets[:]:
+        bullet.update()
+        bullet.display()
+        if bullet.y < 0 or bullet.x < 0 or bullet.x > width:
+            bullets.remove(bullet)
